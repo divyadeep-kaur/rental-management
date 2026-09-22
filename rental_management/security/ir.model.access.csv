@@ -2,3 +2,5 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_rental_order_user,rental.order.user,model_rental_order,base.group_user,1,1,1,1
 access_rental_order_line_user,rental.order.line.user,model_rental_order_line,base.group_user,1,1,1,1
 access_rental_pricing_user,rental.pricing.user,model_rental_pricing,base.group_user,1,1,1,1
+access_rental_order_portal,rental.order.portal,model_rental_order,base.group_portal,1,0,1,0
+access_rental_order_line_portal,rental.order.line.portal,model_rental_order_line,base.group_portal,1,0,1,0

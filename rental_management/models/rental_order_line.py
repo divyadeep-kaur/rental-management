@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -41,6 +43,7 @@ class RentalOrderLine(models.Model):
     actual_pickup_date = fields.Datetime(string="Actual Pickup")
     actual_return_date = fields.Datetime(string="Actual Return")
     late_fee = fields.Monetary(string="Late Fee", default=0.0)
+    return_reminder_sent = fields.Boolean(default=False, copy=False)
     state = fields.Selection(
         [
             ("draft", "Draft"),
@@ -115,3 +118,27 @@ class RentalOrderLine(models.Model):
             late_hours = delta.total_seconds() / 3600.0
             rate = line.product_tmpl_id.extra_hourly_late_fee
             line.late_fee = late_hours * rate * line.quantity
+
+    @api.model
+    def _cron_send_return_reminders(self):
+        reminder_days = int(
+            self.env["ir.config_parameter"].sudo().get_param(
+                "rental_management.reminder_days", default=2
+            )
+        )
+        deadline = fields.Datetime.now() + timedelta(days=reminder_days)
+        template = self.env.ref(
+            "rental_management.email_template_return_reminder", raise_if_not_found=False
+        )
+        if not template:
+            return
+        lines = self.search(
+            [
+                ("state", "=", "picked_up"),
+                ("return_reminder_sent", "=", False),
+                ("planned_return_date", "<=", deadline),
+            ]
+        )
+        for line in lines:
+            template.send_mail(line.id, force_send=True)
+            line.return_reminder_sent = True

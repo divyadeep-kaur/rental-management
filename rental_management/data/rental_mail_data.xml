@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="email_template_return_reminder" model="mail.template">
+            <field name="name">Rental: Return Reminder</field>
+            <field name="model_id" ref="model_rental_order_line"/>
+            <field name="subject">Reminder: return "{{ object.product_id.display_name }}" soon</field>
+            <field name="email_to">{{ object.order_id.partner_id.email }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+                    <p>Hi <t t-out="object.order_id.partner_id.name"/>,</p>
+                    <p>
+                        This is a reminder that your rental of
+                        <strong t-out="object.product_id.display_name"/>
+                        (order <t t-out="object.order_id.name"/>) is due back on
+                        <strong t-out="object.planned_return_date"/>.
+                    </p>
+                    <p>Please arrange the return on time to avoid a late fee.</p>
+                    <p>Thank you,<br/><t t-out="object.order_id.company_id.name"/></p>
+                </div>
+            </field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+    </data>
+</odoo>
