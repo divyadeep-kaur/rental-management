@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class RentalOrderLine(models.Model):
@@ -69,6 +70,39 @@ class RentalOrderLine(models.Model):
     def _compute_price_subtotal(self):
         for line in self:
             line.price_subtotal = line.price_unit * line.quantity * line.duration
+
+    def check_availability(self):
+        """Raise if confirming this line would reserve more units than are on hand,
+        counting other confirmed/picked-up lines for the same product whose rental
+        window overlaps this one.
+        """
+        for line in self:
+            if not line.product_id:
+                continue
+            on_hand = line.product_id.qty_available
+            overlapping_lines = self.search(
+                [
+                    ("id", "!=", line.id),
+                    ("product_id", "=", line.product_id.id),
+                    ("state", "in", ("reserved", "picked_up")),
+                    ("order_id.rental_start_date", "<", line.order_id.rental_end_date),
+                    ("order_id.rental_end_date", ">", line.order_id.rental_start_date),
+                ]
+            )
+            already_reserved = sum(overlapping_lines.mapped("quantity"))
+            if already_reserved + line.quantity > on_hand:
+                available = max(on_hand - already_reserved, 0)
+                raise ValidationError(
+                    "Not enough units of '%s' available for %s to %s: "
+                    "requested %d, only %d available."
+                    % (
+                        line.product_id.display_name,
+                        line.order_id.rental_start_date,
+                        line.order_id.rental_end_date,
+                        line.quantity,
+                        available,
+                    )
+                )
 
     def _compute_late_fee(self):
         for line in self:

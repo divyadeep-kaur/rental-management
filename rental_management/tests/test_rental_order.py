@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from odoo.exceptions import ValidationError
 from odoo.fields import Datetime
 from odoo.tests.common import TransactionCase, tagged
 
@@ -12,6 +13,7 @@ class TestRentalOrder(TransactionCase):
         cls.product_tmpl = cls.env["product.template"].create(
             {
                 "name": "Camera Kit",
+                "type": "product",
                 "rent_ok": True,
                 "extra_hourly_late_fee": 5.0,
             }
@@ -24,6 +26,11 @@ class TestRentalOrder(TransactionCase):
             }
         )
         cls.partner = cls.env["res.partner"].create({"name": "Rental Customer"})
+
+        warehouse = cls.env["stock.warehouse"].search([], limit=1)
+        cls.env["stock.quant"]._update_available_quantity(
+            cls.product_tmpl.product_variant_id, warehouse.lot_stock_id, 3
+        )
 
     def _create_order(self):
         now = Datetime.now()
@@ -83,6 +90,16 @@ class TestRentalOrder(TransactionCase):
 
         # 4 hours late * 5.0/hour * 2 quantity
         self.assertEqual(line.late_fee, 40.0)
+
+    def test_overbooking_raises(self):
+        # 3 units on hand: a 2-unit order for an overlapping window confirms fine,
+        # but a second 2-unit order overlapping the same window should not.
+        order_a = self._create_order()
+        order_a.action_confirm()
+
+        order_b = self._create_order()
+        with self.assertRaises(ValidationError):
+            order_b.action_confirm()
 
     def test_create_invoice_full_payment(self):
         order = self._create_order()
