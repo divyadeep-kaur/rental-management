@@ -13,6 +13,7 @@ class TestRentalOrder(TransactionCase):
         cls.product_tmpl = cls.env["product.template"].create(
             {
                 "name": "Camera Kit",
+                "type": "product",
                 "rent_ok": True,
                 "extra_hourly_late_fee": 5.0,
             }
