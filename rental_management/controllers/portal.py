@@ -1,4 +1,7 @@
+import json
 from datetime import datetime
+
+from markupsafe import Markup
 
 from odoo import fields, http
 from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
@@ -41,12 +44,17 @@ class RentalShopController(http.Controller):
         product = request.env["product.template"].sudo().browse(product_id)
         if not product.exists() or not product.rent_ok:
             return request.not_found()
+        default_rates = product.rental_pricing_ids.filtered(lambda p: not p.pricelist_id)
+        pricing_json = Markup(
+            json.dumps({rate.duration_unit: rate.price for rate in default_rates})
+        )
         return request.render(
             "rental_management.rental_shop_product_page",
             {
                 "product": product,
                 "error": kwargs.get("error"),
                 "is_public_user": request.env.user._is_public(),
+                "pricing_json": pricing_json,
             },
         )
 

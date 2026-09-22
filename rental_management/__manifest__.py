@@ -41,6 +41,7 @@ Features
     "assets": {
         "web.assets_frontend": [
             "rental_management/static/src/css/rental_portal.css",
+            "rental_management/static/src/js/rental_portal.js",
         ],
     },
     "installable": True,
