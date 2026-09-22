@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class ProductTemplate(models.Model):
@@ -21,3 +21,17 @@ class ProductTemplate(models.Model):
         currency_field="currency_id",
         help="Fee charged per hour a rented unit of this product is returned late.",
     )
+    rental_day_price = fields.Monetary(
+        string="Rental Price (per day)",
+        compute="_compute_rental_day_price",
+        currency_field="currency_id",
+        help="Default per-day rental rate shown on the shop page, falling back to the sales price if none is configured.",
+    )
+
+    @api.depends("rental_pricing_ids.duration_unit", "rental_pricing_ids.pricelist_id", "rental_pricing_ids.price", "list_price")
+    def _compute_rental_day_price(self):
+        for product in self:
+            day_rate = product.rental_pricing_ids.filtered(
+                lambda p: p.duration_unit == "day" and not p.pricelist_id
+            )[:1]
+            product.rental_day_price = day_rate.price if day_rate else product.list_price

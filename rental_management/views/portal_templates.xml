@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="rental_shop_page" name="Rental Shop">
+        <t t-call="portal.frontend_layout">
+            <div id="wrap" class="o_rental_shop_wrap">
+                <div class="container py-5">
+                    <h1 class="o_rental_shop_title mb-4">Rent our equipment</h1>
+                    <div class="row g-4">
+                        <t t-foreach="products" t-as="product">
+                            <div class="col-12 col-sm-6 col-lg-4">
+                                <a t-attf-href="/rental/shop/#{product.id}" class="text-decoration-none">
+                                    <div class="o_rental_card">
+                                        <div class="o_rental_card_image"
+                                             t-attf-style="background-image: url(/web/image/product.template/#{product.id}/image_1024);"/>
+                                        <div class="o_rental_card_body">
+                                            <div class="o_rental_card_title" t-out="product.name"/>
+                                            <div class="o_rental_card_price">
+                                                From
+                                                <span t-out="product.rental_day_price" t-options="{'widget': 'monetary', 'display_currency': product.currency_id}"/>
+                                                / day
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </t>
+                        <t t-if="not products">
+                            <p class="text-muted">No rental products are available right now.</p>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="rental_shop_product_page" name="Rental Product">
+        <t t-call="portal.frontend_layout">
+            <div id="wrap" class="o_rental_shop_wrap">
+                <div class="container py-5">
+                    <a href="/rental/shop" class="o_rental_back_link">&#8592; Back to shop</a>
+                    <div class="row mt-3 g-5">
+                        <div class="col-12 col-md-6">
+                            <div class="o_rental_product_image"
+                                 t-attf-style="background-image: url(/web/image/product.template/#{product.id}/image_1024);"/>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <h1 t-out="product.name"/>
+                            <p class="text-muted" t-out="product.description_sale"/>
+
+                            <t t-if="error">
+                                <div class="alert alert-danger">Please check the quantity and dates and try again.</div>
+                            </t>
+
+                            <table class="table o_rental_pricing_table">
+                                <thead>
+                                    <tr><th>Duration</th><th>Price</th></tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="product.rental_pricing_ids.filtered(lambda p: not p.pricelist_id)" t-as="rate">
+                                        <tr>
+                                            <td>
+                                                Per <span t-out="rate.duration_unit"/>
+                                            </td>
+                                            <td>
+                                                <span t-out="rate.price" t-options="{'widget': 'monetary', 'display_currency': rate.currency_id}"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+
+                            <t t-if="is_public_user">
+                                <div class="o_rental_signin_prompt">
+                                    <p>Sign in to request this rental.</p>
+                                    <a t-attf-href="/web/login?redirect=/rental/shop/#{product.id}" class="btn btn-primary o_rental_cta">Sign in</a>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <form action="/rental/request" method="post" class="o_rental_booking_form">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <input type="hidden" name="product_id" t-att-value="product.id"/>
+
+                                    <div class="mb-3">
+                                        <label class="form-label">Quantity</label>
+                                        <input type="number" name="quantity" class="form-control" value="1" min="1"/>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label">Duration</label>
+                                            <input type="number" name="duration" class="form-control" t-att-value="product.min_rental_duration or 1" min="1"/>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label">Unit</label>
+                                            <select name="duration_unit" class="form-select">
+                                                <option value="hour">Hour</option>
+                                                <option value="day" selected="selected">Day</option>
+                                                <option value="week">Week</option>
+                                                <option value="month">Month</option>
+                                                <option value="year">Year</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label">Pickup date</label>
+                                            <input type="datetime-local" name="planned_pickup_date" class="form-control"/>
+                                        </div>
+                                        <div class="col-6 mb-3">
+                                            <label class="form-label">Return date</label>
+                                            <input type="datetime-local" name="planned_return_date" class="form-control"/>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary o_rental_cta">Request this rental</button>
+                                </form>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_my_rentals" name="My Rentals">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <div class="o_portal_my_doc_table">
+                <t t-if="not orders">
+                    <p class="text-muted">You don't have any rentals yet. <a href="/rental/shop">Browse the shop</a>.</p>
+                </t>
+                <t t-if="orders">
+                    <table class="table o_rental_pricing_table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Rental Start</th>
+                                <th>Rental End</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="orders" t-as="order">
+                                <tr>
+                                    <td><a t-attf-href="/my/rentals/#{order.id}" t-out="order.name"/></td>
+                                    <td t-out="order.rental_start_date"/>
+                                    <td t-out="order.rental_end_date"/>
+                                    <td>
+                                        <span t-out="order.amount_total" t-options="{'widget': 'monetary', 'display_currency': order.currency_id}"/>
+                                    </td>
+                                    <td>
+                                        <span t-attf-class="badge o_rental_badge o_rental_badge_#{order.state}" t-out="order.state"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                    <t t-call="portal.pager"/>
+                </t>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_rental_detail" name="Rental Order Detail">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="False"/>
+            <div class="container py-4">
+                <h2 t-out="order.name"/>
+                <div class="o_rental_status_track mb-4">
+                    <t t-foreach="['draft', 'confirmed', 'picked_up', 'returned']" t-as="step">
+                        <span t-att-class="'o_rental_step %s' % ('active' if step == order.state or (step == 'draft' and order.state == 'sent') else '')" t-out="step.replace('_', ' ').title()"/>
+                    </t>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Duration</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="order.order_line_ids" t-as="line">
+                            <tr>
+                                <td t-out="line.product_id.display_name"/>
+                                <td t-out="line.quantity"/>
+                                <td>
+                                    <span t-out="line.duration"/> <span t-out="line.duration_unit"/>
+                                </td>
+                                <td>
+                                    <span t-out="line.price_subtotal" t-options="{'widget': 'monetary', 'display_currency': order.currency_id}"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+                <div class="text-end">
+                    <strong>Total: </strong>
+                    <span t-out="order.amount_total" t-options="{'widget': 'monetary', 'display_currency': order.currency_id}"/>
+                </div>
+            </div>
+        </t>
+    </template>
+
+</odoo>

@@ -1,0 +1,134 @@
+.o_rental_shop_wrap {
+    background: #f8f7fb;
+    min-height: 60vh;
+}
+
+.o_rental_shop_title {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.o_rental_card {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(20, 20, 43, 0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    height: 100%;
+}
+
+.o_rental_card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(20, 20, 43, 0.12);
+}
+
+.o_rental_card_image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    background-color: #eceafc;
+}
+
+.o_rental_card_body {
+    padding: 1.1rem 1.25rem 1.4rem;
+}
+
+.o_rental_card_title {
+    font-weight: 600;
+    color: #14142b;
+    margin-bottom: 0.35rem;
+    font-size: 1.05rem;
+}
+
+.o_rental_card_price {
+    color: #6c5ce7;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.o_rental_back_link {
+    color: #6c5ce7;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.o_rental_product_image {
+    width: 100%;
+    min-height: 320px;
+    border-radius: 16px;
+    background-size: cover;
+    background-position: center;
+    background-color: #eceafc;
+}
+
+.o_rental_pricing_table th {
+    color: #8a8aa3;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-top: none;
+}
+
+.o_rental_booking_form .form-control,
+.o_rental_booking_form .form-select {
+    border-radius: 10px;
+    border-color: #e3e1f5;
+}
+
+.o_rental_cta {
+    background: #6c5ce7;
+    border-color: #6c5ce7;
+    border-radius: 10px;
+    padding: 0.65rem 1.5rem;
+    font-weight: 600;
+}
+
+.o_rental_cta:hover {
+    background: #5b4bd6;
+    border-color: #5b4bd6;
+}
+
+.o_rental_badge {
+    padding: 0.35em 0.75em;
+    border-radius: 999px;
+    text-transform: capitalize;
+    font-weight: 500;
+    background: #eceafc;
+    color: #6c5ce7;
+}
+
+.o_rental_badge_returned {
+    background: #e3f7ec;
+    color: #1e9e5e;
+}
+
+.o_rental_badge_picked_up {
+    background: #fff4e0;
+    color: #b8720a;
+}
+
+.o_rental_badge_cancelled {
+    background: #fde8e8;
+    color: #c0392b;
+}
+
+.o_rental_status_track {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.o_rental_step {
+    padding: 0.4em 1em;
+    border-radius: 999px;
+    background: #f1f0fa;
+    color: #8a8aa3;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.o_rental_step.active {
+    background: #6c5ce7;
+    color: #ffffff;
+}

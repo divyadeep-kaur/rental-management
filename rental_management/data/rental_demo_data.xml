@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- People: sample customers -->
+        <record id="rental_demo_partner_aisha" model="res.partner">
+            <field name="name">Aisha Khan</field>
+            <field name="email">aisha.khan@example.com</field>
+            <field name="phone">+1 555-201-4471</field>
+            <field name="city">Austin</field>
+            <field name="customer_rank">1</field>
+        </record>
+        <record id="rental_demo_partner_marco" model="res.partner">
+            <field name="name">Marco Rossi</field>
+            <field name="email">marco.rossi@example.com</field>
+            <field name="phone">+1 555-330-8842</field>
+            <field name="city">Denver</field>
+            <field name="customer_rank">1</field>
+        </record>
+        <record id="rental_demo_partner_lena" model="res.partner">
+            <field name="name">Lena Schmidt</field>
+            <field name="email">lena.schmidt@example.com</field>
+            <field name="phone">+1 555-118-2290</field>
+            <field name="city">Seattle</field>
+            <field name="customer_rank">1</field>
+        </record>
+        <record id="rental_demo_partner_devon" model="res.partner">
+            <field name="name">Devon Carter</field>
+            <field name="email">devon.carter@example.com</field>
+            <field name="phone">+1 555-902-1156</field>
+            <field name="city">Chicago</field>
+            <field name="customer_rank">1</field>
+        </record>
+        <record id="rental_demo_partner_priya" model="res.partner">
+            <field name="name">Priya Nair</field>
+            <field name="email">priya.nair@example.com</field>
+            <field name="phone">+1 555-664-7723</field>
+            <field name="city">Boston</field>
+            <field name="customer_rank">1</field>
+        </record>
+
+        <!-- Rentable products -->
+        <record id="rental_demo_product_bike" model="product.template">
+            <field name="name">Mountain Bike</field>
+            <field name="type">product</field>
+            <field name="rent_ok">True</field>
+            <field name="list_price">25.0</field>
+            <field name="extra_hourly_late_fee">3.0</field>
+        </record>
+        <record id="rental_demo_pricing_bike_day" model="rental.pricing">
+            <field name="product_tmpl_id" ref="rental_demo_product_bike"/>
+            <field name="duration_unit">day</field>
+            <field name="price">15.0</field>
+        </record>
+
+        <record id="rental_demo_product_camera" model="product.template">
+            <field name="name">DSLR Camera Kit</field>
+            <field name="type">product</field>
+            <field name="rent_ok">True</field>
+            <field name="list_price">60.0</field>
+            <field name="extra_hourly_late_fee">5.0</field>
+        </record>
+        <record id="rental_demo_pricing_camera_day" model="rental.pricing">
+            <field name="product_tmpl_id" ref="rental_demo_product_camera"/>
+            <field name="duration_unit">day</field>
+            <field name="price">45.0</field>
+        </record>
+
+        <record id="rental_demo_product_projector" model="product.template">
+            <field name="name">Projector</field>
+            <field name="type">product</field>
+            <field name="rent_ok">True</field>
+            <field name="list_price">40.0</field>
+            <field name="extra_hourly_late_fee">4.0</field>
+        </record>
+        <record id="rental_demo_pricing_projector_day" model="rental.pricing">
+            <field name="product_tmpl_id" ref="rental_demo_product_projector"/>
+            <field name="duration_unit">day</field>
+            <field name="price">30.0</field>
+        </record>
+
+        <record id="rental_demo_product_tent" model="product.template">
+            <field name="name">4-Person Camping Tent</field>
+            <field name="type">product</field>
+            <field name="rent_ok">True</field>
+            <field name="list_price">35.0</field>
+            <field name="extra_hourly_late_fee">2.5</field>
+        </record>
+        <record id="rental_demo_pricing_tent_day" model="rental.pricing">
+            <field name="product_tmpl_id" ref="rental_demo_product_tent"/>
+            <field name="duration_unit">day</field>
+            <field name="price">20.0</field>
+        </record>
+
+        <!-- Give the demo products some stock to rent out -->
+        <function model="stock.quant" name="_update_available_quantity">
+            <value model="product.template" eval="obj(ref('rental_management.rental_demo_product_bike')).product_variant_id"/>
+            <value model="stock.location" eval="obj(ref('stock.stock_location_stock'))"/>
+            <value eval="5"/>
+        </function>
+        <function model="stock.quant" name="_update_available_quantity">
+            <value model="product.template" eval="obj(ref('rental_management.rental_demo_product_camera')).product_variant_id"/>
+            <value model="stock.location" eval="obj(ref('stock.stock_location_stock'))"/>
+            <value eval="3"/>
+        </function>
+        <function model="stock.quant" name="_update_available_quantity">
+            <value model="product.template" eval="obj(ref('rental_management.rental_demo_product_projector')).product_variant_id"/>
+            <value model="stock.location" eval="obj(ref('stock.stock_location_stock'))"/>
+            <value eval="4"/>
+        </function>
+        <function model="stock.quant" name="_update_available_quantity">
+            <value model="product.template" eval="obj(ref('rental_management.rental_demo_product_tent')).product_variant_id"/>
+            <value model="stock.location" eval="obj(ref('stock.stock_location_stock'))"/>
+            <value eval="6"/>
+        </function>
+
+        <!-- Rental orders across the lifecycle -->
+        <record id="rental_demo_order_1" model="rental.order">
+            <field name="partner_id" ref="rental_demo_partner_aisha"/>
+            <field name="rental_start_date" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="rental_end_date" eval="(DateTime.today() + relativedelta(days=4)).strftime('%Y-%m-%d 18:00:00')"/>
+        </record>
+        <record id="rental_demo_order_1_line" model="rental.order.line">
+            <field name="order_id" ref="rental_demo_order_1"/>
+            <field name="product_id" model="product.template" eval="obj(ref('rental_management.rental_demo_product_bike')).product_variant_id.id"/>
+            <field name="quantity">2</field>
+            <field name="duration_unit">day</field>
+            <field name="duration">3</field>
+            <field name="planned_pickup_date" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="planned_return_date" eval="(DateTime.today() + relativedelta(days=4)).strftime('%Y-%m-%d 18:00:00')"/>
+        </record>
+
+        <record id="rental_demo_order_2" model="rental.order">
+            <field name="partner_id" ref="rental_demo_partner_marco"/>
+            <field name="state">confirmed</field>
+            <field name="rental_start_date" eval="(DateTime.today() + relativedelta(days=-1)).strftime('%Y-%m-%d 10:00:00')"/>
+            <field name="rental_end_date" eval="(DateTime.today() + relativedelta(days=2)).strftime('%Y-%m-%d 17:00:00')"/>
+        </record>
+        <record id="rental_demo_order_2_line" model="rental.order.line">
+            <field name="order_id" ref="rental_demo_order_2"/>
+            <field name="product_id" model="product.template" eval="obj(ref('rental_management.rental_demo_product_camera')).product_variant_id.id"/>
+            <field name="quantity">1</field>
+            <field name="duration_unit">day</field>
+            <field name="duration">3</field>
+            <field name="state">reserved</field>
+            <field name="planned_pickup_date" eval="(DateTime.today() + relativedelta(days=-1)).strftime('%Y-%m-%d 10:00:00')"/>
+            <field name="planned_return_date" eval="(DateTime.today() + relativedelta(days=2)).strftime('%Y-%m-%d 17:00:00')"/>
+        </record>
+
+        <record id="rental_demo_order_3" model="rental.order">
+            <field name="partner_id" ref="rental_demo_partner_lena"/>
+            <field name="state">picked_up</field>
+            <field name="rental_start_date" eval="(DateTime.today() + relativedelta(days=-3)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="rental_end_date" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d 17:00:00')"/>
+        </record>
+        <record id="rental_demo_order_3_line" model="rental.order.line">
+            <field name="order_id" ref="rental_demo_order_3"/>
+            <field name="product_id" model="product.template" eval="obj(ref('rental_management.rental_demo_product_projector')).product_variant_id.id"/>
+            <field name="quantity">1</field>
+            <field name="duration_unit">day</field>
+            <field name="duration">4</field>
+            <field name="state">picked_up</field>
+            <field name="planned_pickup_date" eval="(DateTime.today() + relativedelta(days=-3)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="planned_return_date" eval="(DateTime.today() + relativedelta(days=1)).strftime('%Y-%m-%d 17:00:00')"/>
+            <field name="actual_pickup_date" eval="(DateTime.today() + relativedelta(days=-3)).strftime('%Y-%m-%d 09:15:00')"/>
+        </record>
+
+        <record id="rental_demo_order_4" model="rental.order">
+            <field name="partner_id" ref="rental_demo_partner_devon"/>
+            <field name="state">returned</field>
+            <field name="rental_start_date" eval="(DateTime.today() + relativedelta(days=-10)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="rental_end_date" eval="(DateTime.today() + relativedelta(days=-7)).strftime('%Y-%m-%d 17:00:00')"/>
+        </record>
+        <record id="rental_demo_order_4_line" model="rental.order.line">
+            <field name="order_id" ref="rental_demo_order_4"/>
+            <field name="product_id" model="product.template" eval="obj(ref('rental_management.rental_demo_product_tent')).product_variant_id.id"/>
+            <field name="quantity">2</field>
+            <field name="duration_unit">day</field>
+            <field name="duration">3</field>
+            <field name="state">returned</field>
+            <field name="planned_pickup_date" eval="(DateTime.today() + relativedelta(days=-10)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="planned_return_date" eval="(DateTime.today() + relativedelta(days=-7)).strftime('%Y-%m-%d 17:00:00')"/>
+            <field name="actual_pickup_date" eval="(DateTime.today() + relativedelta(days=-10)).strftime('%Y-%m-%d 09:10:00')"/>
+            <field name="actual_return_date" eval="(DateTime.today() + relativedelta(days=-7)).strftime('%Y-%m-%d 16:40:00')"/>
+        </record>
+
+        <record id="rental_demo_order_5" model="rental.order">
+            <field name="partner_id" ref="rental_demo_partner_priya"/>
+            <field name="state">returned</field>
+            <field name="payment_type">partial</field>
+            <field name="deposit_percentage">40.0</field>
+            <field name="rental_start_date" eval="(DateTime.today() + relativedelta(days=-16)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="rental_end_date" eval="(DateTime.today() + relativedelta(days=-14)).strftime('%Y-%m-%d 17:00:00')"/>
+        </record>
+        <record id="rental_demo_order_5_line" model="rental.order.line">
+            <field name="order_id" ref="rental_demo_order_5"/>
+            <field name="product_id" model="product.template" eval="obj(ref('rental_management.rental_demo_product_bike')).product_variant_id.id"/>
+            <field name="quantity">1</field>
+            <field name="duration_unit">day</field>
+            <field name="duration">2</field>
+            <field name="state">returned</field>
+            <field name="planned_pickup_date" eval="(DateTime.today() + relativedelta(days=-16)).strftime('%Y-%m-%d 09:00:00')"/>
+            <field name="planned_return_date" eval="(DateTime.today() + relativedelta(days=-14)).strftime('%Y-%m-%d 17:00:00')"/>
+            <field name="actual_pickup_date" eval="(DateTime.today() + relativedelta(days=-16)).strftime('%Y-%m-%d 09:05:00')"/>
+            <field name="actual_return_date" eval="(DateTime.today() + relativedelta(days=-14)).strftime('%Y-%m-%d 20:00:00')"/>
+            <field name="late_fee">9.0</field>
+        </record>
+
+    </data>
+</odoo>

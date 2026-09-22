@@ -22,15 +22,27 @@ Features
     "category": "Sales/Rental",
     "author": "Divyadeep Kaur",
     "license": "LGPL-3",
-    "depends": ["sale_management", "stock", "account"],
+    "depends": ["sale_management", "stock", "account", "portal", "mail"],
     "data": [
         "security/ir.model.access.csv",
+        "security/rental_security.xml",
         "data/rental_sequence.xml",
+        "data/rental_mail_data.xml",
+        "data/rental_cron.xml",
         "views/product_template_views.xml",
         "views/rental_pricing_views.xml",
         "views/rental_order_views.xml",
         "views/rental_menus.xml",
+        "views/portal_templates.xml",
     ],
+    "demo": [
+        "data/rental_demo_data.xml",
+    ],
+    "assets": {
+        "web.assets_frontend": [
+            "rental_management/static/src/css/rental_portal.css",
+        ],
+    },
     "installable": True,
     "application": True,
 }
