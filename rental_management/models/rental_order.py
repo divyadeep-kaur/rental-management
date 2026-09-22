@@ -91,6 +91,7 @@ class RentalOrder(models.Model):
             if not order.order_line_ids:
                 raise UserError("Add at least one rental line before confirming.")
             order.order_line_ids.write({"state": "reserved"})
+            order.order_line_ids.check_availability()
             order.state = "confirmed"
 
     def action_pickup(self):
