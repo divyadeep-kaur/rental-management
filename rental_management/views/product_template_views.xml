@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_template_form_view_rental" model="ir.ui.view">
+        <field name="name">product.template.form.rental</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Rental" name="rental">
+                    <group>
+                        <group>
+                            <field name="rent_ok"/>
+                            <field name="min_rental_duration" invisible="not rent_ok"/>
+                            <field name="extra_hourly_late_fee" invisible="not rent_ok"/>
+                        </group>
+                    </group>
+                    <field name="rental_pricing_ids" invisible="not rent_ok">
+                        <tree editable="bottom">
+                            <field name="pricelist_id"/>
+                            <field name="duration_unit"/>
+                            <field name="price"/>
+                            <field name="discount"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_template_search_view_rental" model="ir.ui.view">
+        <field name="name">product.template.search.rental</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <filter string="Can be Rented" name="rent_ok" domain="[('rent_ok', '=', True)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_rental_products" model="ir.actions.act_window">
+        <field name="name">Rental Products</field>
+        <field name="res_model">product.template</field>
+        <field name="view_mode">list,form,kanban</field>
+        <field name="domain">[('rent_ok', '=', True)]</field>
+        <field name="context">{'default_rent_ok': True}</field>
+    </record>
+</odoo>
